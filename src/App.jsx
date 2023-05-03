@@ -1,45 +1,24 @@
-import { useState, useEffect } from "react";
-
-import "./App.css";
+import { useEffect, useState } from "react";
 import Home from "./components/Home";
-import Questions from "./components/Questions";
-import { nanoid } from "nanoid";
+import axios from 'axios'
 
 function App() {
-  const shuffleAnswers = (arr) => arr.sort(() => Math.random() - 0.5);
 
-  const [question, setQuestion] = useState([]);
-const [started,setStarted] = useState(false)
+  const[questions, setQuestions] = useState([])
 
-function startGame (){
-  setStarted(true)
-}
+ 
+    const getQuestions = async () =>{
+      const response = await axios.get("http://opentdb.com/api.php?amount=3&difficulty=easy&type=multiple")
+      const data = response.data.results;
+      setQuestions(data)
+    }
 
-  useEffect(() => {
-    let questions = [];
-    fetch("https://opentdb.com/api.php?amount=5")
-      .then((res) => res.json())
-      .then((data) => {
-        data.results.map((item) => {
-          questions.push({
-            id: nanoid,
-            answers: shuffleAnswers([
-              ...item.incorrect_answers,
-              item.correct_answer,
-            ]),
-            question: item.question,
-            selected: null,
-            checked: false,
-          });
-        });
-      });
-    setQuestion(questions);
-  }, []);
+
+
+
   return (
     <div className="">
-      {started ? <Questions  quest={question}/> :  <Home start={startGame} /> }
-     
-      
+      <Home loadquestions={getQuestions} data={questions}/>
     </div>
   );
 }
